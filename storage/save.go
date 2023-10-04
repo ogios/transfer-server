@@ -6,93 +6,118 @@ import (
 	"strconv"
 
 	"github.com/ogios/simple-socket-server/server/normal"
+
+	"github.com/ogios/transfer-server/log"
 )
 
 var TEXT_FILE_MAX_SIZE int64 = 16 * 1024
-
-func getTextFile() (*os.File, error) {
-	files, err := os.ReadDir(BASE_PATH_TEXT)
-	if err != nil {
-		return nil, err
-	}
-	if len(files) == 0 {
-		return os.Create("1")
-	}
-	m := 2
-	var ff os.DirEntry = nil
-	for _, f := range files {
-		ind, err := strconv.Atoi(f.Name())
-		if err == nil {
-			if ind > m {
-				m = ind
-				ff = f
-			}
-		}
-	}
-	if ff == nil {
-		return os.Create(strconv.Itoa(m))
-	} else {
-		info, err := ff.Info()
-		if err != nil {
-			return nil, err
-		}
-		if info.Size() >= TEXT_FILE_MAX_SIZE {
-			return os.Create(strconv.Itoa(m + 1))
-		} else {
-			return os.OpenFile(strconv.Itoa(m), os.O_RDWR, 0644)
-		}
-	}
-}
 
 func save(conn *normal.Conn, f *os.File) (start int64, end int64, err error) {
 	defer f.Close()
 	bufsize := 1024
 	total, err := conn.Si.Next()
 	if err == nil {
+		log.Info(nil, "total length: %d", total)
 		start, err = f.Seek(0, io.SeekEnd)
 		if err == nil {
+			log.Debug(nil, "start offset: %d", start)
 			temp := make([]byte, bufsize)
+			var read int
 			for {
-				read, err := conn.Si.Read(temp)
-				if err != nil {
-					break
-				}
-				f.Write(temp[:read])
-				total -= read
-				if total == 0 {
-					end, err := f.Seek(0, io.SeekEnd)
-					if err != nil {
-						break
+				read, err = conn.Si.Read(temp)
+				if err == nil {
+					f.Write(temp[:read])
+					total -= read
+					log.Debug(nil, "for total: %d", total)
+					if total == 0 {
+						end, err = f.Seek(0, io.SeekEnd)
+						if err != nil {
+							break
+						}
+						log.Debug(nil, "end offset: %d", start)
+						f.Sync()
+						return start, end, nil
+					} else if total < bufsize {
+						temp = make([]byte, total)
 					}
-					return start, end, nil
-				} else if total < bufsize {
-					temp = make([]byte, total)
+					continue
 				}
+				break
 			}
 		}
 	}
 	return 0, 0, err
 }
 
+func getTextFile() (*os.File, error) {
+	log.Debug(nil, "Reading text dir")
+	files, err := os.ReadDir(BASE_PATH_TEXT)
+	if err != nil {
+		log.Error(nil, "Read text dir error: %s", err)
+		return nil, err
+	}
+	m := 1
+	var ff os.DirEntry = nil
+	log.Debug(nil, "Getting max text file start")
+	for _, f := range files {
+		ind, err := strconv.Atoi(f.Name())
+		if err == nil {
+			if ind >= m {
+				log.Debug(nil, "max text file replace: &d", ind)
+				m = ind
+				ff = f
+			}
+		}
+	}
+	log.Debug(nil, "Getting max text file done")
+	if ff == nil {
+		log.Info(nil, "dir empty, create 1")
+		return os.Create(BASE_PATH_TEXT + "/" + strconv.Itoa(m))
+	} else {
+		log.Debug(nil, "checking if text file size over: %d", TEXT_FILE_MAX_SIZE)
+		info, err := ff.Info()
+		if err != nil {
+			log.Error(nil, "Read text file info error: %s", err)
+			return nil, err
+		}
+		log.Debug(nil, "text file size: %d", info.Size())
+		if info.Size() >= TEXT_FILE_MAX_SIZE {
+			log.Debug(nil, "creating new text file")
+			return os.Create(BASE_PATH_TEXT + "/" + strconv.Itoa(m+1))
+		} else {
+			log.Debug(nil, "using old text file")
+			return os.OpenFile(BASE_PATH_TEXT+"/"+strconv.Itoa(m), os.O_RDWR, 0644)
+		}
+	}
+}
+
 func saveText(reader *normal.Conn) (int64, int64, error) {
 	TEXT_FILE_LOCK.L.Lock()
 	defer TEXT_FILE_LOCK.L.Unlock()
+	log.Debug(nil, "getting text file...")
 	f, err := getTextFile()
 	if err != nil {
+		log.Error(nil, "get text file error: %s", err)
 		return 0, 0, err
 	}
+	log.Debug(nil, "saving text file...")
 	start, end, err := save(reader, f)
 	if err != nil {
+		log.Error(nil, "save text file error: %s", err)
 		return 0, 0, err
 	}
 	return start, end, err
 }
 
 func SaveText(reader *normal.Conn) error {
+	log.Debug(nil, "saving text...")
 	start, end, err := saveText(reader)
 	if err != nil {
+		log.Error(nil, "save text error: %s", err)
 		return err
 	}
+	log.Debug(nil, "save text done: start-%d end-%d", start, end)
+	log.Debug(nil, "saving text metadata...")
 	AddMetaData(MetaData{
 		Type: TYPE_TEXT,
 		Data: MetaDataText{
@@ -100,5 +125,6 @@ func SaveText(reader *normal.Conn) error {
 			End:   end,
 		},
 	})
+	log.Debug(nil, "save text metadata done")
 	return nil
 }
