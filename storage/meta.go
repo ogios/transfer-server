@@ -3,8 +3,6 @@ package storage
 import "sync"
 
 var META_FILE_LOCK sync.Cond
-var TEXT_FILE_LOCK sync.Cond
-var BYTE_FILE_LOCK sync.Cond
 
 var TYPE_TEXT uint8 = 1
 var TYPE_BYTE uint8 = 2

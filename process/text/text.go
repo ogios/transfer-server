@@ -4,7 +4,7 @@ import (
 	"github.com/ogios/simple-socket-server/server/normal"
 
 	"github.com/ogios/transfer-server/log"
-	"github.com/ogios/transfer-server/storage"
+	"github.com/ogios/transfer-server/storage/save"
 )
 
 func TextCallback(conn *normal.Conn) error {
@@ -16,7 +16,7 @@ func TextCallback(conn *normal.Conn) error {
 	// fmt.Println(string(data))
 	defer conn.Close()
 	log.Info(nil, "Storage text start")
-	err := storage.SaveText(conn)
+	err := save.SaveText(conn)
 	log.Info(nil, "Storage text done")
 	if err != nil {
 		return err

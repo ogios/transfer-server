@@ -89,8 +89,6 @@ func init() {
 	BASE_PATH_BYTE = path + "/byte"
 	BASE_PATH_META = path + "/meta.json"
 	META_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
-	TEXT_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
-	BYTE_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
 	makeDir(BASE_PATH)
 	makeDir(BASE_PATH_TEXT)
 	makeDir(BASE_PATH_BYTE)

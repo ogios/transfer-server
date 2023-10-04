@@ -1,57 +1,26 @@
-package storage
+package save
 
 import (
-	"io"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/ogios/simple-socket-server/server/normal"
 
 	"github.com/ogios/transfer-server/log"
+	"github.com/ogios/transfer-server/storage"
 )
 
 var TEXT_FILE_MAX_SIZE int64 = 16 * 1024
+var TEXT_FILE_LOCK sync.Cond
 
-func save(conn *normal.Conn, f *os.File) (start int64, end int64, err error) {
-	defer f.Close()
-	bufsize := 1024
-	total, err := conn.Si.Next()
-	if err == nil {
-		log.Info(nil, "total length: %d", total)
-		start, err = f.Seek(0, io.SeekEnd)
-		if err == nil {
-			log.Debug(nil, "start offset: %d", start)
-			temp := make([]byte, bufsize)
-			var read int
-			for {
-				read, err = conn.Si.Read(temp)
-				if err == nil {
-					f.Write(temp[:read])
-					total -= read
-					log.Debug(nil, "for total: %d", total)
-					if total == 0 {
-						end, err = f.Seek(0, io.SeekEnd)
-						if err != nil {
-							break
-						}
-						log.Debug(nil, "end offset: %d", start)
-						f.Sync()
-						return start, end, nil
-					} else if total < bufsize {
-						temp = make([]byte, total)
-					}
-					continue
-				}
-				break
-			}
-		}
-	}
-	return 0, 0, err
+func init() {
+	TEXT_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
 }
 
 func getTextFile() (*os.File, error) {
 	log.Debug(nil, "Reading text dir")
-	files, err := os.ReadDir(BASE_PATH_TEXT)
+	files, err := os.ReadDir(storage.BASE_PATH_TEXT)
 	if err != nil {
 		log.Error(nil, "Read text dir error: %s", err)
 		return nil, err
@@ -72,7 +41,7 @@ func getTextFile() (*os.File, error) {
 	log.Debug(nil, "Getting max text file done")
 	if ff == nil {
 		log.Info(nil, "dir empty, create 1")
-		return os.Create(BASE_PATH_TEXT + "/" + strconv.Itoa(m))
+		return os.Create(storage.BASE_PATH_TEXT + "/" + strconv.Itoa(m))
 	} else {
 		log.Debug(nil, "checking if text file size over: %d", TEXT_FILE_MAX_SIZE)
 		info, err := ff.Info()
@@ -83,10 +52,10 @@ func getTextFile() (*os.File, error) {
 		log.Debug(nil, "text file size: %d", info.Size())
 		if info.Size() >= TEXT_FILE_MAX_SIZE {
 			log.Debug(nil, "creating new text file")
-			return os.Create(BASE_PATH_TEXT + "/" + strconv.Itoa(m+1))
+			return os.Create(storage.BASE_PATH_TEXT + "/" + strconv.Itoa(m+1))
 		} else {
 			log.Debug(nil, "using old text file")
-			return os.OpenFile(BASE_PATH_TEXT+"/"+strconv.Itoa(m), os.O_RDWR, 0644)
+			return os.OpenFile(storage.BASE_PATH_TEXT+"/"+strconv.Itoa(m), os.O_RDWR, 0644)
 		}
 	}
 }
@@ -118,9 +87,9 @@ func SaveText(reader *normal.Conn) error {
 	}
 	log.Debug(nil, "save text done: start-%d end-%d", start, end)
 	log.Debug(nil, "saving text metadata...")
-	AddMetaData(MetaData{
-		Type: TYPE_TEXT,
-		Data: MetaDataText{
+	storage.AddMetaData(storage.MetaData{
+		Type: storage.TYPE_TEXT,
+		Data: storage.MetaDataText{
 			Start: start,
 			End:   end,
 		},
