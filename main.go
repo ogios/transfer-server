@@ -20,6 +20,7 @@ func main() {
 
 	AddRouters(server)
 
+	log.Info(nil, "Start serving")
 	if err := server.Serv(); err != nil {
 		log.Error(nil, "Serv error: &v", err)
 		panic(err)

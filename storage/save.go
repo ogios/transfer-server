@@ -1,13 +1,14 @@
 package storage
 
 import (
-	"bufio"
 	"io"
 	"os"
 	"strconv"
+
+	"github.com/ogios/simple-socket-server/server/normal"
 )
 
-var TEXT_FILE_MAX_SIZE int = 16 * 1024
+var TEXT_FILE_MAX_SIZE int64 = 16 * 1024
 
 func getTextFile() (*os.File, error) {
 	files, err := os.ReadDir(BASE_PATH_TEXT)
@@ -35,37 +36,69 @@ func getTextFile() (*os.File, error) {
 		if err != nil {
 			return nil, err
 		}
-		if info.Size() > 
+		if info.Size() >= TEXT_FILE_MAX_SIZE {
+			return os.Create(strconv.Itoa(m + 1))
+		} else {
+			return os.OpenFile(strconv.Itoa(m), os.O_RDWR, 0644)
+		}
 	}
-	return os.Create(strconv.Itoa(m))
 }
 
-func save(r io.Reader, f *os.File) error {
+func save(conn *normal.Conn, f *os.File) (start int64, end int64, err error) {
 	defer f.Close()
-	temp := make([]byte, 1024)
-	reader := bufio.NewReader(r)
-	for {
-		read, err := reader.Read(temp)
-		if err != nil {
-			if err == io.EOF {
-				return nil
-			} else {
-				return err
+	bufsize := 1024
+	total, err := conn.Si.Next()
+	if err == nil {
+		start, err = f.Seek(0, io.SeekEnd)
+		if err == nil {
+			temp := make([]byte, bufsize)
+			for {
+				read, err := conn.Si.Read(temp)
+				if err != nil {
+					break
+				}
+				f.Write(temp[:read])
+				total -= read
+				if total == 0 {
+					end, err := f.Seek(0, io.SeekEnd)
+					if err != nil {
+						break
+					}
+					return start, end, nil
+				} else if total < bufsize {
+					temp = make([]byte, total)
+				}
 			}
 		}
-		f.Write(temp[:read])
 	}
+	return 0, 0, err
 }
 
-func SaveText(reader io.Reader) error {
+func saveText(reader *normal.Conn) (int64, int64, error) {
 	TEXT_FILE_LOCK.L.Lock()
 	defer TEXT_FILE_LOCK.L.Unlock()
 	f, err := getTextFile()
 	if err != nil {
-		return err
+		return 0, 0, err
 	}
-	err = save(reader, f)
+	start, end, err := save(reader, f)
+	if err != nil {
+		return 0, 0, err
+	}
+	return start, end, err
+}
+
+func SaveText(reader *normal.Conn) error {
+	start, end, err := saveText(reader)
 	if err != nil {
 		return err
 	}
+	AddMetaData(MetaData{
+		Type: TYPE_TEXT,
+		Data: MetaDataText{
+			Start: start,
+			End:   end,
+		},
+	})
+	return nil
 }

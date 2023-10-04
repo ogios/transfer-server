@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/ogios/simple-socket-server/server/normal"
-
 	"github.com/ogios/transfer-server/log"
 )
 
@@ -15,6 +14,10 @@ func TextCallback(conn *normal.Conn) error {
 		return err
 	}
 	fmt.Println(string(data))
-
+	// defer conn.Close()
+	// err := storage.SaveText(conn)
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }

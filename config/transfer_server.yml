@@ -1,5 +1,5 @@
 storage:
-  path: "~/.local/transfer-server"
+  path: 
 
 proxy_server:
   addr: "127.0.0.1:15002"
