@@ -3,11 +3,14 @@ package main
 import (
 	"github.com/ogios/simple-socket-server/server/normal"
 
-	by "github.com/ogios/transfer-server/process/byte"
-	"github.com/ogios/transfer-server/process/text"
+	"github.com/ogios/transfer-server/process/push"
 )
 
 func AddRouters(server *normal.Server) {
-	server.AddTypeCallback("text", text.TextCallback)
-	server.AddTypeCallback("byte", by.ByteCallback)
+	// push
+	server.AddTypeCallback("text", push.PushText)
+	server.AddTypeCallback("byte", push.PushByte)
+
+	// fetch
+	server.AddTypeCallback("fetch")
 }

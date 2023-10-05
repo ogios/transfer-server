@@ -60,27 +60,28 @@ func getTextFile() (*os.File, error) {
 	}
 }
 
-func saveText(reader *normal.Conn) (int64, int64, error) {
+func saveText(reader *normal.Conn) (string, int64, int64, error) {
 	TEXT_FILE_LOCK.L.Lock()
 	defer TEXT_FILE_LOCK.L.Unlock()
 	log.Debug(nil, "getting text file...")
 	f, err := getTextFile()
 	if err != nil {
 		log.Error(nil, "get text file error: %s", err)
-		return 0, 0, err
+		return "", 0, 0, err
 	}
+	defer f.Close()
 	log.Debug(nil, "saving text file...")
 	start, end, err := save(reader, f)
 	if err != nil {
 		log.Error(nil, "save text file error: %s", err)
-		return 0, 0, err
+		return "", 0, 0, err
 	}
-	return start, end, err
+	return f.Name(), start, end, err
 }
 
 func SaveText(reader *normal.Conn) error {
 	log.Debug(nil, "saving text...")
-	start, end, err := saveText(reader)
+	filename, start, end, err := saveText(reader)
 	if err != nil {
 		log.Error(nil, "save text error: %s", err)
 		return err
@@ -90,8 +91,9 @@ func SaveText(reader *normal.Conn) error {
 	storage.AddMetaData(storage.MetaData{
 		Type: storage.TYPE_TEXT,
 		Data: storage.MetaDataText{
-			Start: start,
-			End:   end,
+			Start:    start,
+			End:      end,
+			Filename: filename,
 		},
 	})
 	log.Debug(nil, "save text metadata done")
