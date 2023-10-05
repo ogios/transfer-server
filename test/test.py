@@ -3,7 +3,6 @@ import socket
 HOST = "127.0.0.1"
 PORT = 15001
 
-a = "a"
 b = b""
 
 def get_len(content: bytes) -> list[int]:
@@ -19,20 +18,17 @@ def get_len(content: bytes) -> list[int]:
         l.append(0)
     return l
 
-t = "text".encode()
-tl = get_len(t)
-b = b + bytes(tl) + t
+def add_bytes(old: bytes, content: str) -> bytes:
+    t = content.encode()
+    tl = get_len(t)
+    return old + bytes(tl) + t
 
-c = a.encode()
-cl = get_len(c)
-b = b + bytes(cl) + c
-
+b = add_bytes(b, "byte")
+b = add_bytes(b, "test.txt")
+b = add_bytes(b, "a")
 print(b)
 
-
-
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 s.connect((HOST, PORT))
 s.send(b)
 s.close()
