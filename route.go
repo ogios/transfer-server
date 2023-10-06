@@ -14,4 +14,5 @@ func AddRouters(server *normal.Server) {
 
 	// fetch
 	server.AddTypeCallback("fetch", fetch.FetchMeta)
+	server.AddTypeCallback("fetch_byte", fetch.FetchFile)
 }
