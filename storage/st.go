@@ -52,7 +52,7 @@ func syncMeta() {
 	for {
 		time.Sleep(time.Second * 10)
 		log.Info(nil, "sync meta file")
-		f, err := os.OpenFile(BASE_PATH_META, os.O_WRONLY, 0644)
+		f, err := os.OpenFile(BASE_PATH_META, os.O_WRONLY|os.O_TRUNC, 0644)
 		if err == nil {
 			log.Debug(nil, "json encoding meta file")
 			encoder := json.NewEncoder(f)
@@ -71,6 +71,29 @@ func startMeta() {
 		log.Debug(nil, "json parsing meta file")
 		decoder := json.NewDecoder(f)
 		err = decoder.Decode(&MetaDataMap)
+		if err != nil {
+			panic(err)
+		}
+
+		for index, metadata := range MetaDataMap {
+			var raw []byte
+			raw, err = json.Marshal(metadata.Data)
+			if err == nil {
+				var data any
+				switch metadata.Type {
+				case TYPE_BYTE:
+					data = &MetaDataByte{}
+				case TYPE_TEXT:
+					data = &MetaDataText{}
+				}
+				err = json.Unmarshal(raw, data)
+				if err == nil {
+					MetaDataMap[index].Data = data
+				} else {
+					break
+				}
+			}
+		}
 	}
 	if err != nil {
 		panic(err)

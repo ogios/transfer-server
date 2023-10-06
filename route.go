@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/ogios/simple-socket-server/server/normal"
 
+	"github.com/ogios/transfer-server/process/fetch"
 	"github.com/ogios/transfer-server/process/push"
 )
 
@@ -12,5 +13,5 @@ func AddRouters(server *normal.Server) {
 	server.AddTypeCallback("byte", push.PushByte)
 
 	// fetch
-	server.AddTypeCallback("fetch")
+	server.AddTypeCallback("fetch", fetch.FetchMeta)
 }

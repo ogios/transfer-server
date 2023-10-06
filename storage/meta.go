@@ -13,20 +13,20 @@ var TYPE_BYTE uint8 = 2
 var MetaDataMap []MetaData
 
 type MetaDataText struct {
-	Start    int64  `json:"start,omitempty"`
-	End      int64  `json:"end,omitempty"`
-	Filename string `json:"filename,omitempty"`
+	Start    int64  `json:"start"`
+	End      int64  `json:"end"`
+	Filename string `json:"filename"`
 }
 
 type MetaDataByte struct {
-	Filename string `json:"filename,omitempty"`
-	Size     int64  `json:"size,omitempty"`
+	Filename string `json:"filename"`
+	Size     int64  `json:"size"`
 }
 
 type MetaData struct {
-	Type uint8 `json:"type,omitempty"`
-	Time int64 `json:"time,omitempty"`
-	Data any   `json:"data,omitempty"`
+	Type uint8 `json:"type"`
+	Time int64 `json:"time"`
+	Data any   `json:"data"`
 }
 
 func AddMetaData(d MetaData) {

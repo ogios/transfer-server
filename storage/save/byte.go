@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -44,8 +45,8 @@ func SaveByte(conn *normal.Conn) error {
 	log.Debug(nil, "saving byte metadata...")
 	storage.AddMetaData(storage.MetaData{
 		Type: storage.TYPE_BYTE,
-		Data: storage.MetaDataByte{
-			Filename: filename,
+		Data: &storage.MetaDataByte{
+			Filename: filepath.Base(f.Name()),
 			Size:     end - start,
 		},
 	})

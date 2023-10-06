@@ -90,7 +90,7 @@ func SaveText(reader *normal.Conn) error {
 	log.Debug(nil, "saving text metadata...")
 	storage.AddMetaData(storage.MetaData{
 		Type: storage.TYPE_TEXT,
-		Data: storage.MetaDataText{
+		Data: &storage.MetaDataText{
 			Start:    start,
 			End:      end,
 			Filename: filename,
