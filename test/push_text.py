@@ -5,18 +5,21 @@ PORT = 15001
 
 b = b""
 
-def get_len(content: bytes) -> list[int]:
+
+def int_to_255(total) -> list[int]:
     l: list[int] = []
-    total = len(content)
     while total >= 255:
-        l.append(total%255)
-        total //=255
+        l.append(total % 255)
+        total //= 255
     l.append(total)
-    if len(l) > 8:
-        raise Exception("Length over 8")
-    while len(l) < 8:
-        l.append(0)
     return l
+
+
+def get_len(content: bytes) -> list[int]:
+    l = int_to_255(len(content))
+    l.append(255)
+    return l
+
 
 def add_bytes(old: bytes, add: bytes) -> bytes:
     tl = get_len(add)
@@ -26,6 +29,7 @@ def add_bytes(old: bytes, add: bytes) -> bytes:
 def add_string(old: bytes, content: str) -> bytes:
     t = content.encode()
     return add_bytes(old, t)
+
 
 b = add_string(b, "text")
 b = add_string(b, "a")

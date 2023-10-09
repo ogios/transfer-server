@@ -16,14 +16,18 @@ def int_to_255(total) -> list[int]:
     return l
 
 
+# def get_len(content: bytes) -> list[int]:
+#     l = int_to_255(len(content))
+#     if len(l) > 8:
+#         raise Exception("Length over 8")
+#     while len(l) < 8:
+#         l.append(0)
+#     return l
+
 def get_len(content: bytes) -> list[int]:
     l = int_to_255(len(content))
-    if len(l) > 8:
-        raise Exception("Length over 8")
-    while len(l) < 8:
-        l.append(0)
+    l.append(255)
     return l
-
 
 def add_bytes(old: bytes, add: bytes) -> bytes:
     tl = get_len(add)

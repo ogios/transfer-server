@@ -39,48 +39,37 @@ func fetchInt(conn *normal.Conn) (int, error) {
 }
 
 func FetchMeta(conn *normal.Conn) (err error) {
-	defer conn.Close()
-	defer func() {
-		if e := recover(); e != nil {
-			log.Error(nil, "Error in fetch: %v", e)
-			err = e.(error)
-			log.Debug(nil, "Adding error to output")
-			conn.So.AddBytes([]byte("error"))
-			conn.So.AddBytes([]byte(err.Error()))
-			log.Debug(nil, "Writing error to output")
-			conn.So.WriteTo(conn.Raw)
-			log.Debug(nil, "Writing error to output done")
-		}
-	}()
+	log.Debug(nil, "fetching index")
 	index, err := fetchInt(conn)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	log.Debug(nil, "fetching size")
 	size, err := fetchInt(conn)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	log.Debug(nil, "fetch params: index-%d size-%d", index, size)
 	metas, err := fetch.Fetch(index, size)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	bs, err := json.Marshal(metas)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = conn.So.AddBytes([]byte{200})
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = conn.So.AddBytes(bs)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = conn.So.WriteTo(conn.Raw)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil

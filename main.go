@@ -12,7 +12,8 @@ import (
 func main() {
 
 	log.SetLevel(slog.LevelDebug)
-	server, err := normal.NewSocketServer()
+
+	server, err := normal.NewSocketServer(":15001")
 	if err != nil {
 		log.Error(nil, "Socket server error: &v", err)
 		panic(err)

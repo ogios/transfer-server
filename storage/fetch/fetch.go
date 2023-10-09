@@ -48,7 +48,7 @@ func Fetch(pageindex int, size int) ([]storage.MetaData, error) {
 					}()
 					log.Debug(nil, "fetching text content")
 					temp := m.Data
-					log.Debug(nil, "fetch temp: %v", m)
+					log.Debug(nil, "fetch temp: %v - %v", m, m.Data)
 					d := temp.(*storage.MetaDataText)
 					text, err := FetchText(d.Start, d.End, d.Filename)
 					if err != nil {

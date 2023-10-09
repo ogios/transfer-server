@@ -1,9 +1,10 @@
-github.com/ogios/simple-socket-server v0.1.3 h1:paIFPi9jKH7nMReHEYjqst05ogGYpfjbBL9UqkOedio=
-github.com/ogios/simple-socket-server v0.1.3/go.mod h1:UHTaZUHjn+2qU9WP0o2C1/edqytD3dc50VWDD7hYfbs=
-github.com/ogios/sutils v0.1.2 h1:eTVXifl8YpXvNpHmbYnUvmNCSdtxPlZ2VXe0RAoORYI=
-github.com/ogios/sutils v0.1.2/go.mod h1:nPIARZnGDLW/kZA/gGfGHYXVV3JXpvOXuhoa1qWZOV4=
+github.com/ogios/simple-socket-server v0.1.4 h1:D804haZTSfexsA9gON3tOZwpD1sCuRMSK9ly/1aynz0=
+github.com/ogios/simple-socket-server v0.1.4/go.mod h1:U/5zgu5j2nqJvCyY9wEdNo/h9zyq4WRT3vEhPXMUBNI=
+github.com/ogios/sutils v0.1.5 h1:d01yRiufMZMN0R2SMF+xvsiMkOMWgB45XBfRazOBxqA=
+github.com/ogios/sutils v0.1.5/go.mod h1:nPIARZnGDLW/kZA/gGfGHYXVV3JXpvOXuhoa1qWZOV4=
 golang.org/x/exp v0.0.0-20230905200255-921286631fa9 h1:GoHiUyI/Tp2nVkLI2mCxVkOjsbSXD66ic0XW0js0R9g=
 golang.org/x/exp v0.0.0-20230905200255-921286631fa9/go.mod h1:S2oDrQGGwySpoQPVqRShND87VCbxmc6bL1Yd2oYrm6k=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
