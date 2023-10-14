@@ -24,14 +24,14 @@ func AddRouters(server *normal.Server) {
 	})
 
 	server.AddMiddlewareOnStart(func(conn *normal.Conn) error {
-		err := conn.Raw.SetDeadline(time.Now().Add(time.Second * 2))
+		err := conn.Raw.SetDeadline(time.Now().Add(time.Second * 10))
 		if err != nil {
 			return err
 		}
-		err = conn.Raw.SetReadDeadline(time.Now().Add(time.Second * 2))
-		if err != nil {
-			return err
-		}
+		// err = conn.Raw.SetReadDeadline(time.Now().Add(time.Second * 10))
+		// if err != nil {
+		// 	return err
+		// }
 		return nil
 	})
 

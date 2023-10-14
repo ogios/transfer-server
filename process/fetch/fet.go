@@ -8,10 +8,16 @@ import (
 	"github.com/ogios/simple-socket-server/server/normal"
 
 	"github.com/ogios/transfer-server/log"
+	"github.com/ogios/transfer-server/storage"
 	"github.com/ogios/transfer-server/storage/fetch"
 )
 
 var FETCH_PARAM_MAXLEN int = 255
+
+type FetchRes struct {
+	Total int                `json:"total"`
+	Data  []storage.MetaData `json:"data"`
+}
 
 func fetchParam(conn *normal.Conn) ([]byte, error) {
 	length, err := conn.Si.Next()
@@ -55,7 +61,11 @@ func FetchMeta(conn *normal.Conn) (err error) {
 	if err != nil {
 		return err
 	}
-	bs, err := json.Marshal(metas)
+	data := FetchRes{
+		Total: len(storage.MetaDataMap),
+		Data:  metas,
+	}
+	bs, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
