@@ -42,6 +42,11 @@ func SaveByte(conn *normal.Conn) error {
 		return err
 	}
 	log.Debug(nil, "save byte file done: length-%d", end-start)
+	log.Debug(nil, "writing push byte success info...")
+	err = WriteSuccess(conn)
+	if err != nil {
+		log.Error(nil, "write push byte success info error: %v", err)
+	}
 	log.Debug(nil, "saving byte metadata...")
 	storage.AddMetaData(storage.MetaData{
 		Type: storage.TYPE_BYTE,

@@ -27,12 +27,12 @@ def add_bytes(old: bytes, add: bytes) -> bytes:
 
 
 def add_string(old: bytes, content: str) -> bytes:
-    t = content.encode()
+    t = content.encode("utf-8")
     return add_bytes(old, t)
 
 
 b = add_string(b, "text")
-b = add_string(b, "a")
+b = add_string(b, "分撒发声法是否会撒谎福安市法华寺的的撒的话分撒分撒")
 print(b)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

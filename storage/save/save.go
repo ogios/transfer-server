@@ -6,6 +6,7 @@ import (
 
 	"github.com/ogios/simple-socket-server/server/normal"
 	"github.com/ogios/transfer-server/log"
+	"github.com/ogios/transfer-server/process"
 )
 
 func save(conn *normal.Conn, f *os.File) (start int64, end int64, err error) {
@@ -43,4 +44,18 @@ func save(conn *normal.Conn, f *os.File) (start int64, end int64, err error) {
 		}
 	}
 	return 0, 0, err
+}
+
+func WriteSuccess(conn *normal.Conn) error {
+	err := conn.So.AddBytes([]byte(process.STATUS_SUCCESS))
+	if err != nil {
+		log.Error(nil, "add success response error: %s", err)
+		return err
+	}
+	err = conn.So.WriteTo(conn.Raw)
+	if err != nil {
+		log.Error(nil, "write response error: %s", err)
+		return err
+	}
+	return nil
 }

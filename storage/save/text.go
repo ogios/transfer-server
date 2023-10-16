@@ -76,6 +76,11 @@ func saveText(reader *normal.Conn) (string, int64, int64, error) {
 		log.Error(nil, "save text file error: %s", err)
 		return "", 0, 0, err
 	}
+	log.Debug(nil, "writing push text success info...")
+	err = WriteSuccess(reader)
+	if err != nil {
+		log.Error(nil, "write push text success info error: %v", err)
+	}
 	return f.Name(), start, end, err
 }
 
