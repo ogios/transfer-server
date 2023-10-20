@@ -1,0 +1,6 @@
+{
+  "runner": {
+    "command": "go run . --debug",
+    "name": "transfer-server"
+  }
+}

@@ -12,7 +12,6 @@ import (
 var FETCH_MAX_FILENAME int = 255
 
 func FetchFile(conn *normal.Conn) (err error) {
-
 	length, err := conn.Si.Next()
 	if err != nil {
 		return err

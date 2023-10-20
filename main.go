@@ -10,10 +10,11 @@ import (
 )
 
 func main() {
+	if GlobalConfig.Debug {
+		log.SetLevel(slog.LevelDebug)
+	}
 
-	log.SetLevel(slog.LevelDebug)
-
-	server, err := normal.NewSocketServer(":15001")
+	server, err := normal.NewSocketServer(GlobalConfig.Address)
 	if err != nil {
 		log.Error(nil, "Socket server error: &v", err)
 		panic(err)

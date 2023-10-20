@@ -9,14 +9,17 @@ import (
 
 	"github.com/ogios/transfer-server/config"
 	"github.com/ogios/transfer-server/log"
+	"golang.org/x/exp/slog"
 )
 
-var BASE_PATH string
-var BASE_PATH_TEXT string
-var BASE_PATH_BYTE string
-var BASE_PATH_META string
+var (
+	BASE_PATH      string
+	BASE_PATH_TEXT string
+	BASE_PATH_BYTE string
+	BASE_PATH_META string
+)
 
-func makeDir(dir string) error {
+func makeDir(dir string) {
 	fi, err := os.Stat(dir)
 	if err != nil || !fi.IsDir() {
 		log.Info(nil, "Creating dir: %s", dir)
@@ -27,10 +30,9 @@ func makeDir(dir string) error {
 	}
 	p, _ := filepath.Abs(dir)
 	log.Debug(nil, "exist dir: %s", p)
-	return nil
 }
 
-func makeFile(path string) error {
+func makeFile(path string) {
 	fi, err := os.Stat(path)
 	if err != nil || fi.IsDir() {
 		f, err := os.Create(path)
@@ -45,13 +47,17 @@ func makeFile(path string) error {
 		}
 		f.Close()
 	}
-	return nil
 }
 
 func syncMeta() {
 	for {
 		time.Sleep(time.Second * 10)
 		log.Info(nil, "sync meta file")
+		log.Info(nil, "metadatamap: %v", MetaDataMap)
+		if len(MetaDataMap) > 0 {
+			log.Info(nil, "metadatamap[0]: %v", *MetaDataMap[0])
+			log.Info(nil, "metadatamap.data: %v", MetaDataMap[0].Data)
+		}
 		f, err := os.OpenFile(BASE_PATH_META, os.O_WRONLY|os.O_TRUNC, 0644)
 		if err == nil {
 			log.Debug(nil, "json encoding meta file")
@@ -75,7 +81,7 @@ func startMeta() {
 			panic(err)
 		}
 
-		for index, metadata := range MetaDataMap {
+		for _, metadata := range MetaDataMap {
 			var raw []byte
 			raw, err = json.Marshal(metadata.Data)
 			if err == nil {
@@ -85,10 +91,13 @@ func startMeta() {
 					data = &MetaDataByte{}
 				case TYPE_TEXT:
 					data = &MetaDataText{}
+				default:
+					log.Error([]any{slog.String("Function", "startMeta")}, "metadata type mismathc: %d", metadata.Type)
+					continue
 				}
 				err = json.Unmarshal(raw, data)
 				if err == nil {
-					MetaDataMap[index].Data = data
+					metadata.Data = data
 				} else {
 					break
 				}

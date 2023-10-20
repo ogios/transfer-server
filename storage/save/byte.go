@@ -8,19 +8,12 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/ogios/simple-socket-server/server/normal"
 
 	"github.com/ogios/transfer-server/log"
 	"github.com/ogios/transfer-server/storage"
 )
-
-var BYTE_FILE_LOCK sync.Cond
-
-func init() {
-	BYTE_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
-}
 
 func SaveByte(conn *normal.Conn) error {
 	filename, err := getFilename(conn)
@@ -48,7 +41,7 @@ func SaveByte(conn *normal.Conn) error {
 		log.Error(nil, "write push byte success info error: %v", err)
 	}
 	log.Debug(nil, "saving byte metadata...")
-	storage.AddMetaData(storage.MetaData{
+	storage.AddMetaData(&storage.MetaData{
 		Type: storage.TYPE_BYTE,
 		Data: &storage.MetaDataByte{
 			Filename: filepath.Base(f.Name()),
@@ -60,8 +53,8 @@ func SaveByte(conn *normal.Conn) error {
 }
 
 func getByteFile(name string) (*os.File, error) {
-	BYTE_FILE_LOCK.L.Lock()
-	defer BYTE_FILE_LOCK.L.Unlock()
+	storage.BYTE_FILE_LOCK.L.Lock()
+	defer storage.BYTE_FILE_LOCK.L.Unlock()
 	log.Debug(nil, "Matching file name")
 	name, err := matchFilename(name)
 	if err != nil {

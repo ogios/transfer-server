@@ -15,8 +15,8 @@ import (
 var FETCH_PARAM_MAXLEN int = 255
 
 type FetchRes struct {
-	Total int                `json:"total"`
-	Data  []storage.MetaData `json:"data"`
+	Data  []*storage.MetaData `json:"data"`
+	Total int                 `json:"total"`
 }
 
 func fetchParam(conn *normal.Conn) ([]byte, error) {
@@ -36,7 +36,7 @@ func fetchInt(conn *normal.Conn) (int, error) {
 		return 0, err
 	}
 	total := 0
-	for index, b := range sec {
+	for index, b := range sec[:len(sec)-1] {
 		feat := int(math.Pow(255, float64(index)))
 		total += int(b) * feat
 	}

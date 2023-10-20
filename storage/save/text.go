@@ -3,7 +3,6 @@ package save
 import (
 	"os"
 	"strconv"
-	"sync"
 
 	"github.com/ogios/simple-socket-server/server/normal"
 
@@ -12,10 +11,8 @@ import (
 )
 
 var TEXT_FILE_MAX_SIZE int64 = 16 * 1024
-var TEXT_FILE_LOCK sync.Cond
 
 func init() {
-	TEXT_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
 }
 
 func getTextFile() (*os.File, error) {
@@ -61,8 +58,8 @@ func getTextFile() (*os.File, error) {
 }
 
 func saveText(reader *normal.Conn) (string, int64, int64, error) {
-	TEXT_FILE_LOCK.L.Lock()
-	defer TEXT_FILE_LOCK.L.Unlock()
+	storage.TEXT_FILE_LOCK.L.Lock()
+	defer storage.TEXT_FILE_LOCK.L.Unlock()
 	log.Debug(nil, "getting text file...")
 	f, err := getTextFile()
 	if err != nil {
@@ -93,7 +90,7 @@ func SaveText(reader *normal.Conn) error {
 	}
 	log.Debug(nil, "save text done: start-%d end-%d", start, end)
 	log.Debug(nil, "saving text metadata...")
-	storage.AddMetaData(storage.MetaData{
+	storage.AddMetaData(&storage.MetaData{
 		Type: storage.TYPE_TEXT,
 		Data: &storage.MetaDataText{
 			Start:    start,
@@ -101,6 +98,6 @@ func SaveText(reader *normal.Conn) error {
 			Filename: filename,
 		},
 	})
-	log.Debug(nil, "save text metadata done")
+	log.Debug(nil, "save text metadata done: %v", *storage.MetaDataMap[len(storage.MetaDataMap)-1])
 	return nil
 }

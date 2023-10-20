@@ -7,6 +7,7 @@ import (
 	"github.com/ogios/simple-socket-server/server/normal"
 
 	"github.com/ogios/transfer-server/log"
+	"github.com/ogios/transfer-server/process/delete"
 	"github.com/ogios/transfer-server/process/fetch"
 	"github.com/ogios/transfer-server/process/push"
 )
@@ -42,4 +43,8 @@ func AddRouters(server *normal.Server) {
 	// fetch
 	server.AddTypeCallback("fetch", fetch.FetchMeta)
 	server.AddTypeCallback("fetch_byte", fetch.FetchFile)
+
+	// delete
+	server.AddTypeCallback("delete", delete.DeleteByID)
+	server.AddTypeCallback("sync_merta", delete.SyncMeta)
 }

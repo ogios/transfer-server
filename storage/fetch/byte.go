@@ -7,26 +7,34 @@ import (
 	"github.com/ogios/transfer-server/storage"
 )
 
-func searchFileFromMeta(name string) *storage.MetaData {
+func searchFileFromMeta(id string) *storage.MetaData {
 	storage.META_FILE_LOCK.L.Lock()
 	defer storage.META_FILE_LOCK.L.Unlock()
-	for index, data := range storage.MetaDataMap {
-		if data.Type == storage.TYPE_BYTE {
-			d := (data.Data).(*storage.MetaDataByte)
-			if d.Filename == name {
-				return &storage.MetaDataMap[index]
-			}
-		}
+	index, ok := storage.MetaDataIDMap[id]
+	if ok {
+		return storage.MetaDataMap[index]
 	}
+	// for index, data := range storage.MetaDataMap {
+	// 	if data.Type == storage.TYPE_BYTE {
+	// 		d := (data.Data).(*storage.MetaDataByte)
+	// 		if d.Filename == name {
+	// 			return storage.MetaDataMap[index]
+	// 		}
+	// 	}
+	// }
 	return nil
 }
 
-func FetchByte(name string) (*os.File, int64, error) {
-	meta := searchFileFromMeta(name)
+func FetchByte(id string) (*os.File, int64, error) {
+	meta := searchFileFromMeta(id)
 	if meta == nil {
 		return nil, 0, fmt.Errorf("file not found in metadata")
 	}
-	f, err := os.OpenFile(storage.BASE_PATH_BYTE+"/"+name, os.O_RDONLY, 0644)
+	f, err := os.OpenFile(
+		storage.BASE_PATH_BYTE+"/"+meta.Data.(storage.MetaDataByte).Filename,
+		os.O_RDONLY,
+		0644,
+	)
 	if err != nil {
 		return nil, 0, err
 	}
