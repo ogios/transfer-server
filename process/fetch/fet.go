@@ -57,12 +57,12 @@ func FetchMeta(conn *normal.Conn) (err error) {
 	}
 
 	log.Debug(nil, "fetch params: index-%d size-%d", index, size)
-	metas, err := fetch.Fetch(index, size)
+	metas, total, err := fetch.Fetch(index, size)
 	if err != nil {
 		return err
 	}
 	data := FetchRes{
-		Total: len(storage.MetaDataMap),
+		Total: total,
 		Data:  metas,
 	}
 	bs, err := json.Marshal(data)

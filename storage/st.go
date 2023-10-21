@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"time"
 
@@ -128,25 +129,37 @@ func syncMeta() {
 
 		// MetaDataMap
 		f, err := os.OpenFile(BASE_PATH_META, os.O_WRONLY|os.O_TRUNC, 0644)
-		if err == nil {
-			log.Debug(nil, "json encoding meta file")
-			encoder := json.NewEncoder(f)
-			err = encoder.Encode(&MetaDataMap)
-		}
 		if err != nil {
-			log.Error(nil, "sync meta file error: %s", err)
+			log.Error(nil, "open sync meta file error: %s", err)
+			continue
+		}
+		log.Debug(nil, "json encoding meta file")
+		encoder := json.NewEncoder(f)
+		err = encoder.Encode(&MetaDataMap)
+		f.Close()
+		if err != nil {
+			log.Error(nil, "write sync meta file error: %s", err)
+			continue
 		}
 
 		// MetaDataDelList
 		f, err = os.OpenFile(BASE_PATH_META_DEL, os.O_WRONLY|os.O_TRUNC, 0644)
-		if err == nil {
-			log.Debug(nil, "json encoding meta_del file")
-			encoder := json.NewEncoder(f)
-			err = encoder.Encode(&MetaDataDelList)
-		}
 		if err != nil {
-			log.Error(nil, "sync meta_file error: %s", err)
+			log.Error(nil, "open sync meta_file error: %s", err)
+			continue
 		}
+		log.Debug(nil, "json encoding meta_del file")
+		encoder = json.NewEncoder(f)
+		err = encoder.Encode(&MetaDataDelList)
+		f.Close()
+		if err != nil {
+			log.Error(nil, "write sync meta_file error: %s", err)
+			continue
+		}
+
+		// GC
+		f, encoder = nil, nil
+		runtime.GC()
 	}
 }
 
