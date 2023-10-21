@@ -93,9 +93,16 @@ func loadMeta() {
 	}
 }
 
-func loadMetaID() {
+func loadMetaIndex() {
 	for index, metadata := range MetaDataMap {
 		MetaDataIDMap[metadata.ID] = index
+		if metadata.Type == TYPE_TEXT {
+			if _, ok := MetaDataTextMap[metadata.Data.(*MetaDataText).Filename]; !ok {
+				MetaDataTextMap[metadata.Data.(*MetaDataText).Filename] = []*MetaData{metadata}
+			} else {
+				MetaDataTextMap[metadata.Data.(*MetaDataText).Filename] = append(MetaDataTextMap[metadata.Data.(*MetaDataText).Filename], metadata)
+			}
+		}
 	}
 }
 
@@ -114,10 +121,19 @@ func loadMetaDel() {
 	}
 }
 
+func clearDel() {
+	err := ClearDeleteFromFile()
+	if err != nil {
+		panic(err)
+	}
+	ClearDeleteMetaData()
+}
+
 func startMeta() {
 	loadMeta()
-	loadMetaID()
+	loadMetaIndex()
 	loadMetaDel()
+	clearDel()
 	go syncMeta()
 }
 
@@ -164,7 +180,7 @@ func syncMeta() {
 }
 
 func init() {
-	path := config.GLOBAL_CONFIG.Storage.Path
+	path := config.GlobalConfig.Path
 	if path == "" {
 		path = "./data"
 	}

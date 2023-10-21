@@ -14,8 +14,15 @@ func fetchFromData(start, size int) ([]*storage.MetaData, int) {
 	offset := 0
 	startoff := start
 	if len(storage.MetaDataDelList) == 0 {
-		copy(b, storage.MetaDataMap[startoff:startoff+size])
-		return b, len(storage.MetaDataMap)
+		var temp []*storage.MetaData
+		if startoff+size >= len(storage.MetaDataMap) {
+			temp = storage.MetaDataMap[startoff:]
+		} else {
+			temp = storage.MetaDataMap[startoff : startoff+size]
+		}
+		copy(b, temp)
+		offset += len(temp)
+		return b[:offset], len(storage.MetaDataMap)
 	}
 	for index, deleted := range storage.MetaDataDelList {
 		if deleted <= start {
@@ -49,6 +56,7 @@ func Fetch(pageindex int, size int) ([]*storage.MetaData, int, error) {
 	log.Debug(nil, "fetch copied data: %v", data)
 
 	for index, m := range data {
+		fmt.Println(*m)
 		if m.Type == storage.TYPE_TEXT {
 			data[index] = func() (meta *storage.MetaData) {
 				defer func() {

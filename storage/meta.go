@@ -24,9 +24,10 @@ var ID_LENGTH = 5
 
 var (
 	// MetaDataMap   []MetaData
-	MetaDataMap     []*MetaData    = make([]*MetaData, 0)
-	MetaDataIDMap   map[string]int = make(map[string]int)
-	MetaDataDelList []int          = make([]int, 0)
+	MetaDataMap     []*MetaData            = make([]*MetaData, 0)
+	MetaDataDelList []int                  = make([]int, 0)
+	MetaDataIDMap   map[string]int         = make(map[string]int)
+	MetaDataTextMap map[string][]*MetaData = make(map[string][]*MetaData)
 )
 
 type IDPH struct{}
@@ -77,6 +78,13 @@ func AddMetaData(d *MetaData) {
 	d.ID = getNewID()
 	MetaDataMap = append(MetaDataMap, d)
 	MetaDataIDMap[d.ID] = len(MetaDataMap) - 1
+	if d.Type == TYPE_TEXT {
+		if _, ok := MetaDataTextMap[d.Data.(*MetaDataText).Filename]; !ok {
+			MetaDataTextMap[d.Data.(*MetaDataText).Filename] = []*MetaData{d}
+		} else {
+			MetaDataTextMap[d.Data.(*MetaDataText).Filename] = append(MetaDataTextMap[d.Data.(*MetaDataText).Filename], d)
+		}
+	}
 }
 
 func DeleteMetaData(id string) {
@@ -91,6 +99,18 @@ func DeleteMetaData(id string) {
 	}
 }
 
+func clearMetaDataTextMap(fs map[*MetaData]struct{}) {
+	for path, ms := range MetaDataTextMap {
+		temp := make([]*MetaData, 0)
+		for _, m := range ms {
+			if _, ok := fs[m]; ok {
+				temp = append(temp, m)
+			}
+		}
+		MetaDataTextMap[path] = temp
+	}
+}
+
 func ClearDeleteMetaData() {
 	META_FILE_LOCK.L.Lock()
 	defer func() {
@@ -100,29 +120,33 @@ func ClearDeleteMetaData() {
 	if len(MetaDataDelList) == 0 {
 		return
 	}
+
 	var (
-		startoff int
-		delindex int
+		startoff = len(MetaDataMap)
 		temp     = make([]*MetaData, 0)
+		// for text filename
+		fs = map[*MetaData]struct{}{}
 	)
 	for i := 0; i < len(MetaDataDelList); i++ {
-		delindex = MetaDataDelList[i]
+		delindex := MetaDataDelList[i]
 		// original startoff index
 		if i == 0 {
 			startoff = delindex
 		}
-		// if is the last one
-		if delindex == len(MetaDataMap)-1 {
-			continue
+		// if is the last deletion
+		if i == len(MetaDataDelList)-1 {
+			temp = append(temp, MetaDataMap[delindex+1:]...)
 		} else {
-			// if is the last deletion
-			if i == len(MetaDataDelList)-1 {
-				temp = append(temp, MetaDataMap[delindex+1:]...)
-			} else {
-				temp = append(temp, MetaDataMap[delindex+1:MetaDataDelList[i+1]]...)
-			}
+			temp = append(temp, MetaDataMap[delindex+1:MetaDataDelList[i+1]]...)
+		}
+
+		// text filename add for index: MetaDataTextMap deletion
+		m := MetaDataMap[delindex]
+		if m.Type == TYPE_TEXT {
+			fs[m] = struct{}{}
 		}
 	}
+	clearMetaDataTextMap(fs)
 	MetaDataMap = append(MetaDataMap[:startoff], temp...)
 	MetaDataDelList = make([]int, 0)
 }

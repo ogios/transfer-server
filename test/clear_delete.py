@@ -1,14 +1,13 @@
 import socket
 import time
 
-from util import add_string, add_bytes, int_to_255
+from util import add_string
 
 HOST = "127.0.0.1"
 PORT = 15001
 
 b = b""
-b = add_string(b, "delete")
-b = add_string(b, "kn6mp")
+b = add_string(b, "clear_del")
 print(b)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

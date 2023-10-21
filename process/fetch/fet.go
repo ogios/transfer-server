@@ -61,14 +61,17 @@ func FetchMeta(conn *normal.Conn) (err error) {
 	if err != nil {
 		return err
 	}
+	log.Debug(nil, "fetch done")
 	data := FetchRes{
 		Total: total,
 		Data:  metas,
 	}
+	log.Debug(nil, "fetch to json")
 	bs, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
+	log.Debug(nil, "sending fetch")
 	err = conn.So.AddBytes([]byte{200})
 	if err != nil {
 		return err

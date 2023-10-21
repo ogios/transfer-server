@@ -20,7 +20,7 @@ func getID(conn *normal.Conn) (string, error) {
 	return string(id), err
 }
 
-func sendSuccess(conn *normal.Conn) error {
+func SendSuccess(conn *normal.Conn) error {
 	err := conn.So.AddBytes([]byte(process.STATUS_SUCCESS))
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func DeleteData(conn *normal.Conn) error {
 		return err
 	}
 	storage.DeleteMetaData(id)
-	if err = sendSuccess(conn); err != nil {
+	if err = SendSuccess(conn); err != nil {
 		return err
 	}
 	return nil

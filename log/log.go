@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ogios/transfer-server/config"
 	"golang.org/x/exp/slog"
 )
 
 func init() {
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level:     slog.LevelInfo,
-		AddSource: true,
-	})))
+	if config.GlobalConfig.Debug {
+		SetLevel(slog.LevelDebug)
+	} else {
+		SetLevel(slog.LevelInfo)
+	}
 }
 
 func SetLevel(l slog.Leveler) {

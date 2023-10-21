@@ -31,7 +31,7 @@ func FetchByte(id string) (*os.File, int64, error) {
 		return nil, 0, fmt.Errorf("file not found in metadata")
 	}
 	f, err := os.OpenFile(
-		storage.BASE_PATH_BYTE+"/"+meta.Data.(storage.MetaDataByte).Filename,
+		storage.BASE_PATH_BYTE+"/"+meta.Data.(*storage.MetaDataByte).Filename,
 		os.O_RDONLY,
 		0644,
 	)

@@ -46,5 +46,5 @@ func AddRouters(server *normal.Server) {
 
 	// delete
 	server.AddTypeCallback("delete", delete.DeleteByID)
-	server.AddTypeCallback("sync_merta", delete.SyncMeta)
+	server.AddTypeCallback("clear_del", delete.ClearDeleted)
 }
