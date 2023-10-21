@@ -1,5 +1,6 @@
 # dir
 /data
+__pycache__
 
 # file
 *.log

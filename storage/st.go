@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	BASE_PATH      string
-	BASE_PATH_TEXT string
-	BASE_PATH_BYTE string
-	BASE_PATH_META string
+	BASE_PATH          string
+	BASE_PATH_TEXT     string
+	BASE_PATH_BYTE     string
+	BASE_PATH_META     string
+	BASE_PATH_META_DEL string
 )
 
 func makeDir(dir string) {
@@ -49,15 +50,83 @@ func makeFile(path string) {
 	}
 }
 
+func loadMeta() {
+	// load file
+	log.Info(nil, "loading meta file")
+	f, err := os.OpenFile(BASE_PATH_META, os.O_RDONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	// parse file (map)
+	log.Debug(nil, "json parsing meta file")
+	decoder := json.NewDecoder(f)
+	err = decoder.Decode(&MetaDataMap)
+	if err != nil {
+		panic(err)
+	}
+
+	// map to struct
+	for _, metadata := range MetaDataMap {
+		var raw []byte
+		raw, err = json.Marshal(metadata.Data)
+		if err != nil {
+			panic(err)
+		}
+		var data any
+		switch metadata.Type {
+		case TYPE_BYTE:
+			data = &MetaDataByte{}
+		case TYPE_TEXT:
+			data = &MetaDataText{}
+		default:
+			log.Error([]any{slog.String("Function", "startMeta")}, "metadata type mismathc: %d", metadata.Type)
+			continue
+		}
+		err = json.Unmarshal(raw, data)
+		if err == nil {
+			metadata.Data = data
+		} else {
+			break
+		}
+	}
+}
+
+func loadMetaID() {
+	for index, metadata := range MetaDataMap {
+		MetaDataIDMap[metadata.ID] = index
+	}
+}
+
+func loadMetaDel() {
+	log.Info(nil, "loading meta_del file")
+	f, err := os.OpenFile(BASE_PATH_META_DEL, os.O_RDONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Debug(nil, "json parsing meta_del file")
+	decoder := json.NewDecoder(f)
+	err = decoder.Decode(&MetaDataDelList)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func startMeta() {
+	loadMeta()
+	loadMetaID()
+	loadMetaDel()
+	go syncMeta()
+}
+
 func syncMeta() {
 	for {
 		time.Sleep(time.Second * 10)
 		log.Info(nil, "sync meta file")
-		log.Info(nil, "metadatamap: %v", MetaDataMap)
-		if len(MetaDataMap) > 0 {
-			log.Info(nil, "metadatamap[0]: %v", *MetaDataMap[0])
-			log.Info(nil, "metadatamap.data: %v", MetaDataMap[0].Data)
-		}
+		log.Info(nil, "metadatamap: %v | metadatamap_del: %v", MetaDataMap, MetaDataDelList)
+
+		// MetaDataMap
 		f, err := os.OpenFile(BASE_PATH_META, os.O_WRONLY|os.O_TRUNC, 0644)
 		if err == nil {
 			log.Debug(nil, "json encoding meta file")
@@ -67,47 +136,18 @@ func syncMeta() {
 		if err != nil {
 			log.Error(nil, "sync meta file error: %s", err)
 		}
-	}
-}
 
-func startMeta() {
-	log.Info(nil, "loading meta file")
-	f, err := os.OpenFile(BASE_PATH_META, os.O_RDONLY, 0644)
-	if err == nil {
-		log.Debug(nil, "json parsing meta file")
-		decoder := json.NewDecoder(f)
-		err = decoder.Decode(&MetaDataMap)
+		// MetaDataDelList
+		f, err = os.OpenFile(BASE_PATH_META_DEL, os.O_WRONLY|os.O_TRUNC, 0644)
+		if err == nil {
+			log.Debug(nil, "json encoding meta_del file")
+			encoder := json.NewEncoder(f)
+			err = encoder.Encode(&MetaDataDelList)
+		}
 		if err != nil {
-			panic(err)
-		}
-
-		for _, metadata := range MetaDataMap {
-			var raw []byte
-			raw, err = json.Marshal(metadata.Data)
-			if err == nil {
-				var data any
-				switch metadata.Type {
-				case TYPE_BYTE:
-					data = &MetaDataByte{}
-				case TYPE_TEXT:
-					data = &MetaDataText{}
-				default:
-					log.Error([]any{slog.String("Function", "startMeta")}, "metadata type mismathc: %d", metadata.Type)
-					continue
-				}
-				err = json.Unmarshal(raw, data)
-				if err == nil {
-					metadata.Data = data
-				} else {
-					break
-				}
-			}
+			log.Error(nil, "sync meta_file error: %s", err)
 		}
 	}
-	if err != nil {
-		panic(err)
-	}
-	go syncMeta()
 }
 
 func init() {
@@ -120,10 +160,12 @@ func init() {
 	BASE_PATH_TEXT = path + "/text"
 	BASE_PATH_BYTE = path + "/byte"
 	BASE_PATH_META = path + "/meta.json"
+	BASE_PATH_META_DEL = path + "/meta_del.json"
 	META_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
 	makeDir(BASE_PATH)
 	makeDir(BASE_PATH_TEXT)
 	makeDir(BASE_PATH_BYTE)
 	makeFile(BASE_PATH_META)
+	makeFile(BASE_PATH_META_DEL)
 	startMeta()
 }

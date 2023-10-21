@@ -1,44 +1,12 @@
 import socket
 import time
 
+from util import add_string, add_bytes, int_to_255
+
 HOST = "127.0.0.1"
 PORT = 15001
 
 b = b""
-
-
-def int_to_255(total) -> list[int]:
-    l: list[int] = []
-    while total >= 255:
-        l.append(total % 255)
-        total //= 255
-    l.append(total)
-    return l
-
-
-# def get_len(content: bytes) -> list[int]:
-#     l = int_to_255(len(content))
-#     if len(l) > 8:
-#         raise Exception("Length over 8")
-#     while len(l) < 8:
-#         l.append(0)
-#     return l
-
-def get_len(content: bytes) -> list[int]:
-    l = int_to_255(len(content))
-    l.append(255)
-    return l
-
-def add_bytes(old: bytes, add: bytes) -> bytes:
-    tl = get_len(add)
-    return old + bytes(tl) + add
-
-
-def add_string(old: bytes, content: str) -> bytes:
-    t = content.encode()
-    return add_bytes(old, t)
-
-
 b = add_string(b, "fetch")
 b = add_bytes(b, bytes(int_to_255(0)))
 b = add_bytes(b, bytes(int_to_255(10)))
@@ -51,5 +19,6 @@ while 1:
     msg = s.recv(1024)
     if msg:
         print(msg)
+        break
     time.sleep(1)
 s.close()

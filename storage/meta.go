@@ -2,6 +2,7 @@ package storage
 
 import (
 	"math/rand"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -79,15 +80,51 @@ func AddMetaData(d *MetaData) {
 }
 
 func DeleteMetaData(id string) {
+	META_FILE_LOCK.L.Lock()
+	defer META_FILE_LOCK.L.Unlock()
 	if index, ok := MetaDataIDMap[id]; ok {
-		META_FILE_LOCK.L.Lock()
-		defer META_FILE_LOCK.L.Unlock()
 		MetaDataDelList = append(MetaDataDelList, index)
 		sort.Slice(MetaDataDelList, func(i, j int) bool {
 			return MetaDataDelList[i] < MetaDataDelList[j]
 		})
 		delete(MetaDataIDMap, id)
 	}
+}
+
+func ClearDeleteMetaData() {
+	META_FILE_LOCK.L.Lock()
+	defer func() {
+		runtime.GC()
+	}()
+	defer META_FILE_LOCK.L.Unlock()
+	if len(MetaDataDelList) == 0 {
+		return
+	}
+	var (
+		startoff int
+		delindex int
+		temp     = make([]*MetaData, 0)
+	)
+	for i := 0; i < len(MetaDataDelList); i++ {
+		delindex = MetaDataDelList[i]
+		// original startoff index
+		if i == 0 {
+			startoff = delindex
+		}
+		// if is the last one
+		if delindex == len(MetaDataMap)-1 {
+			continue
+		} else {
+			// if is the last deletion
+			if i == len(MetaDataDelList)-1 {
+				temp = append(temp, MetaDataMap[delindex+1:]...)
+			} else {
+				temp = append(temp, MetaDataMap[delindex+1:MetaDataDelList[i+1]]...)
+			}
+		}
+	}
+	MetaDataMap = append(MetaDataMap[:startoff], temp...)
+	MetaDataDelList = make([]int, 0)
 }
 
 func init() {
