@@ -13,6 +13,7 @@ func fetchFromData(start, size int) ([]*storage.MetaData, int) {
 	b := make([]*storage.MetaData, size)
 	offset := 0
 	startoff := start
+	// if no deleteion
 	if len(storage.MetaDataDelList) == 0 {
 		var temp []*storage.MetaData
 		if startoff+size >= len(storage.MetaDataMap) {
@@ -24,6 +25,7 @@ func fetchFromData(start, size int) ([]*storage.MetaData, int) {
 		offset += len(temp)
 		return b[:offset], len(storage.MetaDataMap)
 	}
+	// else
 	for index, deleted := range storage.MetaDataDelList {
 		if deleted <= start {
 			startoff++
@@ -42,8 +44,25 @@ func fetchFromData(start, size int) ([]*storage.MetaData, int) {
 				offset += length
 			}
 			if index == len(storage.MetaDataDelList)-1 && offset != len(b) && startoff < len(storage.MetaDataMap) {
-				copy(b[offset:], storage.MetaDataMap[startoff:])
+				temp := storage.MetaDataMap[startoff:]
+				bleft := b[offset:]
+				copy(bleft, temp)
+				if len(temp) < len(bleft) {
+					offset += len(temp)
+				} else {
+					offset += len(bleft)
+				}
 			}
+		}
+	}
+	if offset != len(b) && startoff < len(storage.MetaDataMap) {
+		temp := storage.MetaDataMap[startoff:]
+		bleft := b[offset:]
+		copy(bleft, temp)
+		if len(temp) < len(bleft) {
+			offset += len(temp)
+		} else {
+			offset += len(bleft)
 		}
 	}
 	return b[:offset], len(storage.MetaDataMap) - len(storage.MetaDataDelList)

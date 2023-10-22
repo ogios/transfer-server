@@ -50,6 +50,21 @@ type MetaData struct {
 	Type uint8  `json:"type"`
 }
 
+func ReloadMetaIndex() {
+	MetaDataIDMap = make(map[string]int)
+	MetaDataTextMap = make(map[string][]*MetaData)
+	for index, metadata := range MetaDataMap {
+		MetaDataIDMap[metadata.ID] = index
+		if metadata.Type == TYPE_TEXT {
+			if _, ok := MetaDataTextMap[metadata.Data.(*MetaDataText).Filename]; !ok {
+				MetaDataTextMap[metadata.Data.(*MetaDataText).Filename] = []*MetaData{metadata}
+			} else {
+				MetaDataTextMap[metadata.Data.(*MetaDataText).Filename] = append(MetaDataTextMap[metadata.Data.(*MetaDataText).Filename], metadata)
+			}
+		}
+	}
+}
+
 var RAND_FIELD = func() string {
 	base := "0123456789"
 	alphab := ""
@@ -99,18 +114,6 @@ func DeleteMetaData(id string) {
 	}
 }
 
-func clearMetaDataTextMap(fs map[*MetaData]struct{}) {
-	for path, ms := range MetaDataTextMap {
-		temp := make([]*MetaData, 0)
-		for _, m := range ms {
-			if _, ok := fs[m]; ok {
-				temp = append(temp, m)
-			}
-		}
-		MetaDataTextMap[path] = temp
-	}
-}
-
 func ClearDeleteMetaData() {
 	META_FILE_LOCK.L.Lock()
 	defer func() {
@@ -146,9 +149,9 @@ func ClearDeleteMetaData() {
 			fs[m] = struct{}{}
 		}
 	}
-	clearMetaDataTextMap(fs)
 	MetaDataMap = append(MetaDataMap[:startoff], temp...)
 	MetaDataDelList = make([]int, 0)
+	ReloadMetaIndex()
 }
 
 func init() {

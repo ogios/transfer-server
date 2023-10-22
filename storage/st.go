@@ -93,19 +93,6 @@ func loadMeta() {
 	}
 }
 
-func loadMetaIndex() {
-	for index, metadata := range MetaDataMap {
-		MetaDataIDMap[metadata.ID] = index
-		if metadata.Type == TYPE_TEXT {
-			if _, ok := MetaDataTextMap[metadata.Data.(*MetaDataText).Filename]; !ok {
-				MetaDataTextMap[metadata.Data.(*MetaDataText).Filename] = []*MetaData{metadata}
-			} else {
-				MetaDataTextMap[metadata.Data.(*MetaDataText).Filename] = append(MetaDataTextMap[metadata.Data.(*MetaDataText).Filename], metadata)
-			}
-		}
-	}
-}
-
 func loadMetaDel() {
 	log.Info(nil, "loading meta_del file")
 	f, err := os.OpenFile(BASE_PATH_META_DEL, os.O_RDONLY, 0644)
@@ -131,9 +118,9 @@ func clearDel() {
 
 func startMeta() {
 	loadMeta()
-	loadMetaIndex()
+	ReloadMetaIndex()
 	loadMetaDel()
-	clearDel()
+	// clearDel()
 	go syncMeta()
 }
 
