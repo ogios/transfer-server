@@ -2,10 +2,12 @@ package fetch
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/ogios/simple-socket-server/server/normal"
 
 	"github.com/ogios/transfer-server/process"
+	"github.com/ogios/transfer-server/storage"
 	"github.com/ogios/transfer-server/storage/fetch"
 )
 
@@ -16,14 +18,14 @@ func FetchFile(conn *normal.Conn) (err error) {
 	if err != nil {
 		return err
 	}
-	if length > FETCH_MAX_FILENAME {
-		return fmt.Errorf("filename too long")
+	if length != storage.ID_LENGTH {
+		return fmt.Errorf("fetch file id length mismatch")
 	}
-	name, err := conn.Si.GetSec()
+	id, err := conn.Si.GetSec()
 	if err != nil {
 		return err
 	}
-	f, size, err := fetch.FetchByte(string(name))
+	f, size, err := fetch.FetchByte(string(id))
 	if err != nil {
 		return err
 	}
@@ -31,7 +33,7 @@ func FetchFile(conn *normal.Conn) (err error) {
 	if err != nil {
 		return err
 	}
-	err = conn.So.AddBytes([]byte(name))
+	err = conn.So.AddBytes([]byte(filepath.Base(f.Name())))
 	if err != nil {
 		return err
 	}
