@@ -114,5 +114,13 @@ func ClearTextFile(texts map[*MetaData]struct{}, files []string) error {
 }
 
 func ClearByteFile(bytes []*MetaData) error {
+	for _, meta := range bytes {
+		b := meta.Data.(*MetaDataByte)
+		path := BASE_PATH_BYTE + "/" + b.Filename
+		err := os.Remove(path)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
