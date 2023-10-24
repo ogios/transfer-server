@@ -25,7 +25,7 @@ func AddRouters(server *normal.Server) {
 	})
 
 	server.AddMiddlewareOnStart(func(conn *normal.Conn) error {
-		err := conn.Raw.SetDeadline(time.Now().Add(time.Second * 10))
+		err := conn.Raw.SetDeadline(time.Now().Add(time.Minute * 5))
 		if err != nil {
 			return err
 		}
