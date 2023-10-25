@@ -88,11 +88,6 @@ jobs:
           tar -xvf upx.tar.xz
           ./upx-4.1.0-amd64_linux/upx -9 ./build/TServ.exe -o ./build/TServ_upx.exe
 
-      - name: "[windows]Compress to gzip"
-        run: |
-          tar -zcvf ./build/TServ_amd64-linux.tar.gz ./build/TServ
-          tar -zcvf ./build/TServ_amd64_upx-linux.tar.gz ./build/TServ_upx
-
       - name: Install zip
         uses: montudor/action-zip@v1
       - name: Compress to zip
