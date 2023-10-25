@@ -120,6 +120,23 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y gettext-base
 
+      - name: Check if release exists
+        id: check_release
+        run: |
+          release_id=$(gh release view $TAG_NAME --repo owner/repo --json id 2>/dev/null)
+          if [ -z "$release_id" ]; then
+            echo "::set-output name=release_exists::false"
+          else
+            echo "::set-output name=release_exists::true"
+            echo "::set-output name=release_id::$release_id"
+          fi
+
+      - name: Delete existing release
+        if: steps.check_release.outputs.release_exists == 'true'
+        run: |
+          release_id=${{ steps.check_release.outputs.release_id }}
+          gh release delete $release_id --repo owner/repo --yes
+
       - name: Create Release and Upload Release Asset
         run: |
           envsubst < "$GITHUB_WORKSPACE/.github/workflows/release_note.md" > "$RUNNER_TEMP/notes.md"
