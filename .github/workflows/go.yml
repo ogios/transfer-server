@@ -1,0 +1,72 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      - name: "[linux] setup go env"
+        run: |
+          go env -w GO111MODULE=on
+          go env -w CGO_ENABLED=0
+          go env -w GOARCH=amd64
+          go env -w GOOS=linux
+          go env
+      - name: "[linux] Build and Compress executable"
+        run: |
+          go env -w GO111MODULE=on
+          go env -w CGO_ENABLED=0
+          go env -w GOARCH=amd64
+          go env -w GOOS=linux
+          export GO111MODULE=on
+          export CGO_ENABLED=0
+          export GOARCH=amd64
+          export GOOS=linux
+          go env
+          ls ..
+          curl -L  https://github.com/upx/upx/releases/download/v4.1.0/upx-4.1.0-amd64_linux.tar.xz -o upx.tar.xz
+          tar -xvf upx.tar.xz
+          go build -ldflags "-s -w" -v -o TServ
+          ./upx-4.1.0-amd64_linux/upx -9 ./TServ -o TServ_upx
+      - name: Compress to gzip
+        run: |
+          tar -zcvf ../TServ_amd64-linux.tar.gz .
+
+      - name: "[windows] setup go env"
+        run: |
+          go env -w GOOS=windows
+      - name: "[windows] Build and Compress executable"
+        run: |
+          go build -ldflags "-s -w" -v -o TServ.exe
+          ./upx-4.1.0-amd64_linux/upx -9 ./TServ.exe -o TServ_upx.exe
+      - name: Install zip
+        uses: montudor/action-zip@v1
+      - name: Compress to zip
+        run: |
+          zip -qq -r ../TServ_amd64-windows.zip .
+
+      - name: Create Release and Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "v1"
+          name: Release v1
+          body: Receives notifications sended from your phone.
+          draft: false
+          prerelease: false
+          token: ${{ secrets.RELEASE_TOKEN }}
+          files: |
+            ../TServ_amd64-linux.tar.gz
+            ../TServ_amd64-windows.zip
