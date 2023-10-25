@@ -127,7 +127,7 @@ jobs:
       - name: Create Release and Upload Release Asset
         run: |
           # envsubst < "$GITHUB_WORKSPACE/.github/workflows/release_note.md" > "$RUNNER_TEMP/notes.md"
-          gh release create $TAG_NAME --notes-file "./.github/workflows/release_note.md" --title "$RELEASE_TITLE" --target tserv-linux64/* tserv-windows64/* --target_commitish main
+          gh release create $TAG_NAME --notes-file "./.github/workflows/release_note.md" --title "$RELEASE_TITLE" --target $GITHUB_SHA tserv-linux64/* tserv-windows64/*
         # uses: softprops/action-gh-release@v1
         # with:
         #   tag_name: ${{ env.TAG_NAME }}
