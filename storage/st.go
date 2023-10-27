@@ -51,6 +51,18 @@ func makeFile(path string) {
 	}
 }
 
+func backupFile(path string) {
+	log.Debug(nil, "backup %s", path)
+	fi, err := os.Stat(path)
+	if err != nil || fi.IsDir() {
+		panic(err)
+	}
+	err = os.Rename(path, path+".bak")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func loadMeta() {
 	// load file
 	log.Info(nil, "loading meta file")
@@ -127,11 +139,12 @@ func startMeta() {
 func syncMeta() {
 	for {
 		time.Sleep(time.Second * 10)
-		log.Info(nil, "sync meta file")
-		log.Info(nil, "metadatamap: %v | metadatamap_del: %v", MetaDataMap, MetaDataDelList)
+		log.Debug(nil, "sync meta file")
+		log.Debug(nil, "metadatamap: %v | metadatamap_del: %v", MetaDataMap, MetaDataDelList)
 
 		// MetaDataMap
-		f, err := os.OpenFile(BASE_PATH_META, os.O_WRONLY|os.O_TRUNC, 0644)
+		backupFile(BASE_PATH_META)
+		f, err := os.OpenFile(BASE_PATH_META, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
 			log.Error(nil, "open sync meta file error: %s", err)
 			continue
@@ -146,7 +159,8 @@ func syncMeta() {
 		}
 
 		// MetaDataDelList
-		f, err = os.OpenFile(BASE_PATH_META_DEL, os.O_WRONLY|os.O_TRUNC, 0644)
+		backupFile(BASE_PATH_META_DEL)
+		f, err = os.OpenFile(BASE_PATH_META_DEL, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
 			log.Error(nil, "open sync meta_file error: %s", err)
 			continue

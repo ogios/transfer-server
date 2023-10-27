@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/ogios/simple-socket-server/server/normal"
 
+	"github.com/ogios/transfer-server/addon/udps"
 	"github.com/ogios/transfer-server/config"
 	"github.com/ogios/transfer-server/log"
 )
@@ -17,6 +18,7 @@ func main() {
 	AddRouters(server)
 
 	log.Info(nil, "Start serving")
+	udps.StartUdps()
 	if err := server.Serv(); err != nil {
 		log.Error(nil, "Serv error: &v", err)
 		panic(err)

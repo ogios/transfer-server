@@ -75,7 +75,7 @@ func Fetch(pageindex int, size int) ([]*storage.MetaData, int, error) {
 	log.Debug(nil, "fetch copied data: %v", data)
 
 	for index, m := range data {
-		fmt.Println(*m)
+		log.Debug(nil, "fetch one: %v", *m)
 		if m.Type == storage.TYPE_TEXT {
 			data[index] = func() (meta *storage.MetaData) {
 				defer func() {

@@ -4,8 +4,8 @@
 name: Go
 
 env:
-  TAG_NAME: "v1"
-  RELEASE_TITLE: "Transfer-server v1"
+  TAG_NAME: "v2"
+  RELEASE_TITLE: "Transfer-server v2"
 
 on:
   push:
