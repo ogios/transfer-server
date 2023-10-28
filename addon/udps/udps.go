@@ -69,13 +69,17 @@ func (u *Udps) process(addr *net.UDPAddr, buf []byte) {
 	saddr := addr.String()
 	msg := string(buf)
 	uc, ok := u.Submap[saddr]
-	if msg == "sub" && !ok {
+	if msg == "sub" {
 		log.Info(nil, "[Subscribe] %s sub", saddr)
 		_, err := u.Conn.WriteToUDP([]byte("ok"), addr)
 		if err != nil {
 			panic(err)
 		}
-		u.Submap[saddr] = NewUdpsCtx()
+		if ok {
+			uc.RefreshOffline()
+		} else {
+			u.Submap[saddr] = NewUdpsCtx()
+		}
 	} else {
 		if ok {
 			log.Debug(nil, "add data to %s", saddr)
