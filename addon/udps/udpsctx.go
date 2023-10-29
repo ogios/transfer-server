@@ -13,9 +13,10 @@ type MsgCtx struct {
 	Data []byte
 }
 
+// make new msg
 func NewMsgCtx(data []byte) *MsgCtx {
 	m := &MsgCtx{
-		Lost: time.Now().Add(time.Duration(time.Second * 10)),
+		Lost: time.Now().Add(time.Duration(MSG_LOST_TIME)),
 		Data: data,
 	}
 	return m
@@ -37,6 +38,7 @@ type UdpsCtx struct {
 	Msgs    []*MsgCtx
 }
 
+// make new conn
 func NewUdpsCtx() *UdpsCtx {
 	u := &UdpsCtx{
 		Lock: &sync.Mutex{},
@@ -52,7 +54,7 @@ func (uc *UdpsCtx) MakeOffline() {
 
 // increase life
 func (uc *UdpsCtx) RefreshOffline() {
-	uc.Offline = time.Now().Add(time.Duration(time.Second * 30))
+	uc.Offline = time.Now().Add(time.Duration(CONN_OFFLINE_TIME))
 }
 
 // check if current UDP client is out of date

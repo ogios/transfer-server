@@ -1,12 +1,15 @@
 package storage
 
 import (
+	"fmt"
 	"math/rand"
 	"runtime"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ogios/transfer-server/addon/udps"
 )
 
 var (
@@ -100,6 +103,7 @@ func AddMetaData(d *MetaData) {
 			MetaDataTextMap[d.Data.(*MetaDataText).Filename] = append(MetaDataTextMap[d.Data.(*MetaDataText).Filename], d)
 		}
 	}
+	Notify()
 }
 
 func DeleteMetaData(id string) {
@@ -112,6 +116,7 @@ func DeleteMetaData(id string) {
 		})
 		delete(MetaDataIDMap, id)
 	}
+	Notify()
 }
 
 func ClearDeleteMetaData() {
@@ -157,4 +162,9 @@ func ClearDeleteMetaData() {
 func init() {
 	TEXT_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
 	BYTE_FILE_LOCK = *sync.NewCond(&sync.Mutex{})
+}
+
+func Notify() {
+	fmt.Println(MetaDataMap)
+	udps.GlobalUdps.BoardCast([]byte{2})
 }

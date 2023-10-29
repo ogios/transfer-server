@@ -9,6 +9,12 @@ import (
 	"github.com/ogios/transfer-server/log"
 )
 
+var (
+	CONN_OFFLINE_TIME = time.Second * 30
+	MSG_LOST_TIME     = time.Second * 10
+	TAKE_DATA_TIME    = time.Second * 5
+)
+
 type Udps struct {
 	Conn   *net.UDPConn
 	Submap map[string]*UdpsCtx
@@ -108,7 +114,7 @@ func (u *Udps) heartBeat() {
 				}
 			}(key)
 		}
-		time.Sleep(time.Duration(time.Second * 20))
+		time.Sleep(time.Duration(CONN_OFFLINE_TIME))
 	}
 }
 
@@ -137,7 +143,7 @@ func (u *Udps) afterHeartBeat(addr string) error {
 		return nil
 	}
 	for {
-		b, err := uc.TakeData(time.Second * 5)
+		b, err := uc.TakeData(TAKE_DATA_TIME)
 		if err != nil {
 			return err
 		}
@@ -199,7 +205,7 @@ func (u *Udps) clearSub() {
 			val.Lock.Unlock()
 		}
 		runtime.GC()
-		time.Sleep(time.Duration(time.Second * 10))
+		time.Sleep(time.Duration(MSG_LOST_TIME))
 	}
 }
 

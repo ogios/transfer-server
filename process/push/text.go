@@ -21,6 +21,5 @@ func PushText(conn *normal.Conn) error {
 	if err != nil {
 		return err
 	}
-	Notify()
 	return nil
 }
