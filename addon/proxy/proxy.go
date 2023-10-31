@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,8 +14,9 @@ import (
 )
 
 type HostAddrs struct {
-	V6 []string
-	V4 []string
+	V6   []string `json:"v6"`
+	V4   []string `json:"v4"`
+	Port int      `json:"port"`
 }
 
 func StartProxy() {
@@ -90,16 +92,22 @@ func GetInetAddr() *HostAddrs {
 	if err != nil {
 		panic(err)
 	}
+	seps := strings.Split(config.GlobalConfig.Address, ":")
+	port, err := strconv.Atoi(seps[len(seps)-1])
+	if err != nil {
+		panic(err)
+	}
 	ha := &HostAddrs{
-		V6: make([]string, 0),
-		V4: make([]string, 0),
+		V6:   make([]string, 0),
+		V4:   make([]string, 0),
+		Port: port,
 	}
 	for _, addr := range addrs {
 		str := addr.String()
 		if strings.Contains(str, ":") {
-			ha.V6 = append(ha.V6, str)
+			ha.V6 = append(ha.V6, strings.Split(str, "/")[0])
 		} else {
-			ha.V4 = append(ha.V4, str)
+			ha.V4 = append(ha.V4, strings.Split(str, "/")[0])
 		}
 	}
 	fmt.Println(*ha)
