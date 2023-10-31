@@ -44,19 +44,19 @@ jobs:
           tar -xvf upx.tar.xz
           ./upx-4.1.0-amd64_linux/upx -9 ./build/TServ -o ./build/TServ_upx
 
-      - name: "[linux]Compress to gzip"
-        run: |
-          tar -zcvf ./build/TServ_amd64-linux.tar.gz ./build/TServ
-          tar -zcvf ./build/TServ_amd64_upx-linux.tar.gz ./build/TServ_upx
+      # - name: "[linux]Compress to gzip"
+      #   run: |
+      #     tar -zcvf ./build/TServ_amd64-linux.tar.gz ./build/TServ
+      #     tar -zcvf ./build/TServ_amd64_upx-linux.tar.gz ./build/TServ_upx
 
       - name: "[linux] Uplaod artifact"
         uses: actions/upload-artifact@v3
         with:
           name: tserv-linux64
           path: |
-            ./build/TServ_amd64-linux.tar.gz
-            ./build/TServ_amd64_upx-linux.tar.gz
-          retention-days: 1
+            ./build/TServ
+            ./build/TServ_upx
+          retention-days: 30
 
   windows:
     runs-on: ubuntu-latest
@@ -89,21 +89,21 @@ jobs:
           tar -xvf upx.tar.xz
           ./upx-4.1.0-amd64_linux/upx -9 ./build/TServ.exe -o ./build/TServ_upx.exe
 
-      - name: Install zip
-        uses: montudor/action-zip@v1
-      - name: Compress to zip
-        run: |
-          zip -qq ./build/TServ_amd64-windows.tar.gz ./build/TServ.exe
-          zip -qq ./build/TServ_amd64_upx-windows.tar.gz ./build/TServ_upx.exe
+      # - name: Install zip
+      #   uses: montudor/action-zip@v1
+      # - name: Compress to zip
+      #   run: |
+      #     zip -qq ./build/TServ_amd64-windows.zip ./build/TServ.exe
+      #     zip -qq ./build/TServ_amd64_upx-windows.zip ./build/TServ_upx.exe
 
       - name: "[windows] Uplaod artifact"
         uses: actions/upload-artifact@v3
         with:
           name: tserv-windows64
           path: |
-            ./build/TServ_amd64-windows.tar.gz
-            ./build/TServ_amd64_upx-windows.tar.gz
-          retention-days: 1
+            ./build/TServ.exe
+            ./build/TServ_upx.exe
+          retention-days: 30
 
   publish:
     needs: [linux, windows]
