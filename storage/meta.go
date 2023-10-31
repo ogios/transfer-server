@@ -103,6 +103,7 @@ func AddMetaData(d *MetaData) {
 			MetaDataTextMap[d.Data.(*MetaDataText).Filename] = append(MetaDataTextMap[d.Data.(*MetaDataText).Filename], d)
 		}
 	}
+	syncMeta()
 	Notify()
 }
 
@@ -116,6 +117,7 @@ func DeleteMetaData(id string) {
 		})
 		delete(MetaDataIDMap, id)
 	}
+	syncMeta()
 	Notify()
 }
 
@@ -157,6 +159,7 @@ func ClearDeleteMetaData() {
 	MetaDataMap = append(MetaDataMap[:startoff], temp...)
 	MetaDataDelList = make([]int, 0)
 	ReloadMetaIndex()
+	syncMeta()
 }
 
 func init() {

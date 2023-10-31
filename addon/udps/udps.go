@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/ogios/transfer-server/config"
 	"github.com/ogios/transfer-server/log"
 )
 
@@ -23,13 +24,15 @@ type Udps struct {
 var GlobalUdps Udps
 
 func StartUdps() {
-	GlobalUdps = Udps{
-		Conn:   createServer(),
-		Submap: map[string]*UdpsCtx{},
+	if config.GlobalConfig.SubEnabled {
+		GlobalUdps = Udps{
+			Conn:   createServer(),
+			Submap: map[string]*UdpsCtx{},
+		}
+		go GlobalUdps.heartBeat()
+		go GlobalUdps.clearSub()
+		go GlobalUdps.startServ()
 	}
-	go GlobalUdps.heartBeat()
-	go GlobalUdps.clearSub()
-	go GlobalUdps.startServ()
 }
 
 // create and return server

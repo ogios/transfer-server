@@ -8,7 +8,8 @@ Data transfer tool written in Go
 - storing text using a 16KB page-based storage scheme.
 - separate delete and clear delete to reduce runtime resource utilization thus faster response.
 - UDP server for message update subscription, making metadata sync more efficiently
+- third-party proxy server for ip addresses communicate
 
 ## TODO
 
-- third-party proxy server for tserv and client address share (p2p usage)
+- p2p
