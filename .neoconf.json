@@ -1,6 +1,7 @@
 {
   "runner": {
-    "command": "go run . --debug",
+    // "command": "go run . --debug",
+    "command": "go run . --debug --proxy 127.0.0.1:15003 --proxy-key 123",
     // "command": "go run .",
     "name": "transfer-server"
   }

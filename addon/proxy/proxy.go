@@ -54,6 +54,10 @@ func process(conn net.Conn) {
 	if err != nil {
 		panic(err)
 	}
+	err = so.AddBytes([]byte(config.GlobalConfig.ProxyKey))
+	if err != nil {
+		panic(err)
+	}
 	addrs := GetInetAddr()
 	saddrs, err := json.Marshal(addrs)
 	if err != nil {
