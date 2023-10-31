@@ -135,7 +135,7 @@ var SyncMeta = func() func() {
 	return func() {
 		l.Lock()
 		defer l.Unlock()
-		// 使用lock保证d.timer更新之前一定先Stop.
+		// use lock to makesure that old timer is stopped(canceled) before overwrite timer
 
 		if timer != nil {
 			timer.Stop()
@@ -145,7 +145,6 @@ var SyncMeta = func() func() {
 }()
 
 func syncMeta() {
-	time.Sleep(time.Second * 10)
 	log.Debug(nil, "sync meta file")
 	log.Debug(nil, "metadatamap: %v | metadatamap_del: %v", MetaDataMap, MetaDataDelList)
 
@@ -186,18 +185,11 @@ func syncMeta() {
 	runtime.GC()
 }
 
-// func syncMetaLoop() {
-// 	for {
-// 		syncMeta()
-// 	}
-// }
-
 func startMeta() {
 	loadMeta()
 	ReloadMetaIndex()
 	loadMetaDel()
 	// clearDel()
-	// go syncMetaLoop()
 }
 
 func init() {
