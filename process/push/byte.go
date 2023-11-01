@@ -1,6 +1,8 @@
 package push
 
 import (
+	"runtime"
+
 	"github.com/ogios/simple-socket-server/server/normal"
 
 	"github.com/ogios/transfer-server/log"
@@ -15,6 +17,7 @@ func PushByte(conn *normal.Conn) error {
 	// }
 	// fmt.Println(data)
 
+	defer runtime.GC()
 	defer conn.Close()
 	log.Info(nil, "Storage text start")
 	err := save.SaveByte(conn)

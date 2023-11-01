@@ -3,6 +3,7 @@ package fetch
 import (
 	"fmt"
 	"path/filepath"
+	"runtime"
 
 	"github.com/ogios/simple-socket-server/server/normal"
 
@@ -29,6 +30,8 @@ func FetchFile(conn *normal.Conn) (err error) {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+	defer runtime.GC()
 	err = conn.So.AddBytes([]byte(process.STATUS_SUCCESS))
 	if err != nil {
 		return err
