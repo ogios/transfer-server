@@ -6,6 +6,8 @@ After=network.target
 Type=simple
 WorkingDirectory=/home/ogios/app/tserv/
 ExecStart=/home/ogios/app/tserv/startup.sh
+Restart=always
+
 
 [Install]
 WantedBy=multi-user.target
