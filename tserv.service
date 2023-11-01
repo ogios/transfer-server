@@ -1,0 +1,11 @@
+[Unit]
+Description=Transfer-server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ogios/app/tserv/
+ExecStart=/home/ogios/app/tserv/startup.sh
+
+[Install]
+WantedBy=multi-user.target
