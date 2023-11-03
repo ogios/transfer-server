@@ -1,3 +1,3 @@
 # transfer-server
 TODO:
-fix memory leak
+~~fix memory leak~~ overthinking
