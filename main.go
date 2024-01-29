@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"github.com/ogios/simple-socket-server/server/normal"
 
